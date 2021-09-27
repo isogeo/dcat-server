@@ -6,9 +6,11 @@
   "license": "GPL-3.0",
   "private": false,
   "scripts": {
-    "lint": "xo"
+    "lint": "xo",
+    "test": "ava"
   },
   "devDependencies": {
+    "ava": "^3.15.0",
     "xo": "^0.44.0"
   },
   "xo": {
