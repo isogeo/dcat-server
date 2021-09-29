@@ -10,9 +10,12 @@
     "test": "ava"
   },
   "dependencies": {
+    "JSONStream": "^1.3.5",
     "dotenv": "^10.0.0",
     "get-stream": "^6.0.1",
-    "got": "^11.8.2"
+    "got": "^11.8.2",
+    "lodash": "^4.17.21",
+    "pumpify": "^2.0.1"
   },
   "devDependencies": {
     "ava": "^3.15.0",
