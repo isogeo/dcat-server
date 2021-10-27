@@ -36,9 +36,16 @@ app.use('/:shareId/:shareToken', w(async (req, res, next) => {
 }))
 
 app.get('/:shareId/:shareToken', w(async (req, res) => {
-  const resourcesStream = await apiClient.getResourcesStream(req.params.shareId)
+  const {shareId, shareToken} = req.params
+  const resourcesStream = await apiClient.getResourcesStream(shareId)
   res.type('application/json')
-  resourcesStream.pipe(transformIntoDcat()).pipe(res)
+  resourcesStream.pipe(transformIntoDcat({shareId, shareToken})).pipe(res)
+}))
+
+app.get('/:shareId/:shareToken/download/:resourceId/:linkId', w(async (req, res) => {
+  const {resourceId, linkId} = req.params
+  const downloadStream = await apiClient.getDownloadStream(resourceId, linkId)
+  downloadStream.pipe(res)
 }))
 
 const port = process.env.PORT || 5000
