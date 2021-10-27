@@ -19,15 +19,24 @@ if (process.env.NODE_ENV !== 'production') {
 
 app.use(cors({origin: true}))
 
-app.get('/:shareId/:shareToken', w(async (req, res) => {
+app.use('/:shareId/:shareToken', w(async (req, res, next) => {
   const {shareId, shareToken} = req.params
-  const share = await apiClient.getShare(shareId)
 
-  if (!share || share.urlToken !== shareToken) {
-    return res.sendStatus(404)
+  if (shareId && shareToken) {
+    const share = await apiClient.getShare(shareId)
+
+    if (!share || share.urlToken !== shareToken) {
+      return res.sendStatus(404)
+    }
+
+    req.share = share
   }
 
-  const resourcesStream = await apiClient.getResourcesStream(shareId)
+  next()
+}))
+
+app.get('/:shareId/:shareToken', w(async (req, res) => {
+  const resourcesStream = await apiClient.getResourcesStream(req.params.shareId)
   res.type('application/json')
   resourcesStream.pipe(transformIntoDcat()).pipe(res)
 }))
