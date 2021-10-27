@@ -29,6 +29,7 @@ Il faut définir les variables d’environnement listées dans le fichier `.env.
 | ISOGEO_TOKEN_URL | URL d’émission de jeton de la plateforme Isogeo | https://id.api.isogeo.com/oauth/token |
 | ISOGEO_CLIENT_ID | Identifiant de l’application | |
 | ISOGEO_CLIENT_SECRET | Secret de l’application | |
+| DCAT_SERVER_URL | URL publique vers le serveur DCAT | https://dcat-server.isogeo.com |
 | PORT | Port d’écoute HTTP| 5000 |
 
 ### Exécuter le serveur
