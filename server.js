@@ -7,7 +7,7 @@ const morgan = require('morgan')
 
 const {Client} = require('./lib/api-client')
 const {transformIntoDcat} = require('./lib/dcat')
-const {transformIntoDebugLog} = require('./lib/debug')
+const {transformIntoDebugLog, transformIntoDebugPage} = require('./lib/debug')
 const w = require('./lib/w')
 
 const apiClient = new Client()
@@ -48,6 +48,13 @@ app.get('/:shareId/:shareToken/debug-log', w(async (req, res) => {
   const resourcesStream = await apiClient.getResourcesStream(shareId)
   res.type('text/plain')
   resourcesStream.pipe(transformIntoDebugLog({shareId, shareToken})).pipe(res)
+}))
+
+app.get('/:shareId/:shareToken/debug-page', w(async (req, res) => {
+  const {shareId, shareToken} = req.params
+  const resourcesStream = await apiClient.getResourcesStream(shareId)
+  res.type('text/html')
+  resourcesStream.pipe(transformIntoDebugPage({shareId, shareToken})).pipe(res)
 }))
 
 app.get('/:shareId/:shareToken/download/:resourceId/:linkId', w(async (req, res) => {
