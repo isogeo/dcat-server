@@ -6,7 +6,8 @@ const cors = require('cors')
 const morgan = require('morgan')
 
 const {Client} = require('./lib/api-client')
-const {transformIntoDcat, transformIntoDebug} = require('./lib/dcat')
+const {transformIntoDcat} = require('./lib/dcat')
+const {transformIntoDebugLog} = require('./lib/debug')
 const w = require('./lib/w')
 
 const apiClient = new Client()
@@ -42,11 +43,11 @@ app.get('/:shareId/:shareToken', w(async (req, res) => {
   resourcesStream.pipe(transformIntoDcat({shareId, shareToken})).pipe(res)
 }))
 
-app.get('/:shareId/:shareToken/debug', w(async (req, res) => {
+app.get('/:shareId/:shareToken/debug-log', w(async (req, res) => {
   const {shareId, shareToken} = req.params
   const resourcesStream = await apiClient.getResourcesStream(shareId)
   res.type('text/plain')
-  resourcesStream.pipe(transformIntoDebug({shareId, shareToken})).pipe(res)
+  resourcesStream.pipe(transformIntoDebugLog({shareId, shareToken})).pipe(res)
 }))
 
 app.get('/:shareId/:shareToken/download/:resourceId/:linkId', w(async (req, res) => {
