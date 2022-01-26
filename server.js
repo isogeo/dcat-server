@@ -60,7 +60,10 @@ app.get('/:shareId/:shareToken/debug-page', w(async (req, res) => {
 app.get('/:shareId/:shareToken/download/:resourceId/:linkId', w(async (req, res) => {
   const {resourceId, linkId} = req.params
   const downloadStream = await apiClient.getDownloadStream(resourceId, linkId)
-  downloadStream.on('error', function(e){res.json({"error" : "File doesn't exist"})})
+  downloadStream.on('error', function(e){
+    res.status(404)
+    res.json({"error" : "File doesn't exist"
+  })})
   downloadStream.pipe(res)
 }))
 
