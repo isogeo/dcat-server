@@ -1,6 +1,6 @@
 {
   "name": "@isogeo/dcat-server",
-  "version": "0.0.0",
+  "version": "0.0.0-19",
   "description": "DCAT server for Isogeo",
   "repository": "git@github.com:isogeo/dcat-server.git",
   "license": "GPL-3.0",
