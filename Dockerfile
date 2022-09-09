@@ -1,13 +1,13 @@
 FROM node:16-alpine as deps
 WORKDIR /opt/app
-COPY ./package.json ./yarn.lock /opt/app
+COPY ./package.json ./yarn.lock /opt/app/
 
 RUN yarn --prod
 
 FROM node:alpine as runner
 
 COPY . .
-COPY --from=deps /opt/app/node_modules ./node_modules
+COPY --from=deps /opt/app/node_modules ./node_modules/
 
 ENV PORT=5000 \
     ISOGEO_API_URL=https://api.qa.isogeo.com/v1 \
