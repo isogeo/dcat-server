@@ -28,7 +28,7 @@ variables:
      tagName : $(sourceName)
 
 stages:
- - stage: Build
+ - stage: product_build
    displayName : Building $(SERVICE_NAME)
    jobs : 
    - job: regularBuild
@@ -112,7 +112,7 @@ stages:
 
  - stage: versions_update
    displayName: Update versions.json
-   dependsOn: image_build
+   dependsOn: product_build
    condition: and(succeeded(), or(contains(variables['Build.SourceBranch'], 'refs/tags'), eq(variables['Build.SourceBranch'], 'refs/heads/debug')))
    jobs:
    - job: Updatejson
