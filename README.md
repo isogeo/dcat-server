@@ -54,5 +54,4 @@ $ yarn lint
 
 ## Documentation
 
-Le flux DCAT d’un partage Isogeo donné est récupéré grâce à l'URL suivant :
-`http://localhost:5000/:shareId/:urlToken`.
+Le flux DCAT d’un partage Isogeo donné est récupéré grâce à l'URL suivant : `http://localhost:5000/:shareId/:urlToken`.
