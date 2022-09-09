@@ -1,6 +1,6 @@
 # dcat-server
 
-Serveur DCAT pour Isogeo
+Serveur DCAT pour Isogeo.
 
 ## Pré-requis
 
