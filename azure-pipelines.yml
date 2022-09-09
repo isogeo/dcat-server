@@ -29,7 +29,7 @@ variables:
 
 stages:
  - stage: product_build
-   displayName : Building ${{ variables.imageRepository }
+   displayName : Building ${{ variables.imageRepository }}
    jobs : 
    - job: regularBuild
      condition: contains(variables['Build.SourceBranch'], 'refs/tags')
