@@ -1,0 +1,8 @@
+{
+    "release-note":"DCAT serveur release note",
+    "compliance":{
+        "api": {
+            "minimum": "2.21.2"
+        }
+    }
+}
