@@ -12,11 +12,11 @@ Serveur DCAT pour Isogeo.
 ### Installation
 
 ```bash
-$ yarn          # dev
+$ yarn         # dev
 
 # ou
 
-$ yarn --prod   # production
+$ yarn --prod  # production
 ```
 
 ### Configuration
