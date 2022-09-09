@@ -29,7 +29,7 @@ variables:
 
 stages:
  - stage: product_build
-   displayName : Building $(SERVICE_NAME)
+   displayName : Building ${{ variables.imageRepository }
    jobs : 
    - job: regularBuild
      condition: contains(variables['Build.SourceBranch'], 'refs/tags')
@@ -91,6 +91,8 @@ stages:
    - job: blob_upload
      displayName: Uploading archive to blob storage
      condition: and(succeeded(), or(contains(variables['Build.SourceBranch'], 'refs/tags'),eq(variables['Build.SourceBranch'], 'refs/heads/debug')))
+     pool:
+       vmImage: $(vmImageName)
      dependsOn:
       - image_blob_build
      steps:
