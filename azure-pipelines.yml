@@ -21,7 +21,7 @@ variables:
   azureSubscription : $(AZURE_SUBSCRIPTION)
   date: $[format('{0:dd}.{0:MM}.{0:yyyy}', pipeline.startTime)]
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/debug') }}:
-     tarName : $(SERVICE_NAME)-debug-$(date).tar
+     tarName : $(SERVICE_NAME)-debug
      tagName : debug-$(date)
   ${{ if contains(variables['Build.SourceBranch'], 'refs/tags') }}:
      tarName : $(SERVICE_NAME)-$(sourceName).tar
@@ -105,8 +105,9 @@ stages:
           downloadType: 'single'
           artifactName: 'image'
           downloadPath: '$(System.ArtifactsDirectory)'
-      - script : echo $(tag) && echo $tag
-        displayName: Test tag display
+      - script: VERSION_TAG=`git describe --tags --abbrev=0` && echo "##vso[task.setvariable variable=tag]$VERSION_TAG"
+        displayName: Set tag variable
+        condition: eq(variables['Build.SourceBranch'], 'refs/heads/debug')
       - script: mv $(System.ArtifactsDirectory)/image/$(imageRepository).tar $(tarName)
         displayName: Rename image file name with correct version
       - task: AzureCLI@1
@@ -114,8 +115,12 @@ stages:
         inputs:
           azureSubscription: $(azureSubscription)
           scriptLocation: inlineScript
-          inlineScript: |
-               az storage blob upload-batch -d $(imageRepository) -s ./ --pattern $(tarName)  --blob-endpoint $(blobstorageURL) --sas-token '"$(AZURE_STORAGE_SAS_TOKEN)"' --account-key '"$(AZURE_STORAGE_KEY)"'
+          ${{ if contains(variables['Build.SourceBranch'], 'refs/tags') }}:
+             inlineScript: |
+                 az storage blob upload-batch -d $(imageRepository) -s ./ --pattern $(tarName)  --blob-endpoint $(blobstorageURL) --sas-token '"$(AZURE_STORAGE_SAS_TOKEN)"' --account-key '"$(AZURE_STORAGE_KEY)"'
+          ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/debug') }}:
+             inlineScript: |
+                 az storage blob upload-batch -d $(imageRepository) -s ./ --pattern $(tarName)-$(tag)-$(date).tar  --blob-endpoint $(blobstorageURL) --sas-token '"$(AZURE_STORAGE_SAS_TOKEN)"' --account-key '"$(AZURE_STORAGE_KEY)"'
 
  - stage: versions_update
    displayName: Update versions.json
