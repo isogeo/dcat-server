@@ -107,11 +107,9 @@ stages:
           downloadPath: '$(System.ArtifactsDirectory)'
       - script : git describe --tags --abbrev=0
         displayName : Test git tag
-      - script: VERSION_TAG=`git describe --tags --abbrev=0` && echo "##vso[task.setvariable variable=gitHubTag]$VERSION_TAG" && TAR_NAME=`echo $(SERVICE_NAME)-debug-$(gitHubTag)-$(date).tar` && echo "##vso[task.setvariable variable=tarname]$TAR_NAME"
-        displayName: Set tag variable
-        condition: eq(variables['Build.SourceBranch'], 'refs/heads/debug')
-      - script : echo $(gitHubTag)
-        displayName : Display GitHub tag
+      - script : TAR_NAME=`echo $(SERVICE_NAME)-debug-$(git describe --tags --abbrev=0)-$(date).tar` && echo "##vso[task.setvariable variable=tarname]$TAR_NAME"
+        displayName: Set tar name
+        condition: contains(variables['Build.SourceBranch'], 'refs/tags')
       - script : TAR_NAME=`echo $(SERVICE_NAME)-$(sourceName).tar` && echo "##vso[task.setvariable variable=tarname]$TAR_NAME"
         displayName: Set tar name
         condition: contains(variables['Build.SourceBranch'], 'refs/tags')
