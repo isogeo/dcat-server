@@ -54,8 +54,7 @@ stages:
        vmImage: $(vmImageName)
      steps:
       - powershell: |
-           $tag = "$(Build.SourceBranch)"
-           $tag = $tag -replace "refs/tags/", ""
+           $tag= (git describe --match "v*" debug)
            echo "##vso[task.setvariable variable=tag;isOutput=true]$tag"
         displayName: Set tag variable
         condition: eq(variables['Build.SourceBranch'], 'refs/heads/debug')
@@ -109,7 +108,7 @@ stages:
           artifactName: 'image'
           downloadPath: '$(System.ArtifactsDirectory)'
       - script : echo $(tag) && echo $tag
-        displayName: Test tag diy
+        displayName: Test tag display
       - script: mv $(System.ArtifactsDirectory)/image/$(imageRepository).tar $(tarName)
         displayName: Rename image file name with correct version
       - task: AzureCLI@1
