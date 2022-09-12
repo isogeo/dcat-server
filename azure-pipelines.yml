@@ -96,7 +96,7 @@ stages:
           ArtifactName: 'image'
    - job: blob_upload
      displayName: Uploading archive to blob storage
-     condition: and(succeeded(), or(contains(variables['Build.SourceBranch'], 'refs/tags'),eq(variables['Build.SourceBranch'], 'refs/heads/debug')))
+     condition: and(succeeded(), or(contains(variables['Build.SourceBranch'], 'refs/tags'),eq(variables['Build.SourceBranch'], 'refs/heads/debug'))
      pool:
        vmImage: $(vmImageName)
      dependsOn:
