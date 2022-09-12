@@ -21,10 +21,8 @@ variables:
   azureSubscription : $(AZURE_SUBSCRIPTION)
   date: $[format('{0:dd}.{0:MM}.{0:yyyy}', pipeline.startTime)]
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/debug') }}:
-     tarName : $(SERVICE_NAME)-debug
      tagName : debug-$(date)
   ${{ if contains(variables['Build.SourceBranch'], 'refs/tags') }}:
-     tarName : $(SERVICE_NAME)-$(sourceName).tar
      tagName : $(sourceName)
 
 stages:
