@@ -53,10 +53,7 @@ stages:
      pool:
        vmImage: $(vmImageName)
      steps:
-      - powershell: |
-           $tags = git tag --sort=-creatordate
-           $tag = $tags[0]
-           echo "##vso[task.setvariable variable=tag;isOutput=true]$tag"
+      - script: VERSION_TAG=`git describe --tags --abbrev=0` && echo "##vso[task.setvariable variable=tag]$VERSION_TAG"
         displayName: Set tag variable
         condition: eq(variables['Build.SourceBranch'], 'refs/heads/debug')
       - script: docker build -t $(imageRepository) . 
