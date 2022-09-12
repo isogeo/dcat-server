@@ -54,7 +54,8 @@ stages:
        vmImage: $(vmImageName)
      steps:
       - powershell: |
-           $tag= (git describe --match "v*" debug)
+           $tags = git tag --sort=-creatordate
+           $tag = $tags[0]
            echo "##vso[task.setvariable variable=tag;isOutput=true]$tag"
         displayName: Set tag variable
         condition: eq(variables['Build.SourceBranch'], 'refs/heads/debug')
