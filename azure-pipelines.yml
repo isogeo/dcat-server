@@ -12,7 +12,6 @@ resources:
 variables:
   blobstorageURL: $(BLOB_STORAGE_URL)
   imageRepository: 'dcat-server'
-  appName: 'dcatserver'
   containerRegistry: $(CONTAINER_REGISTRY)
   dockerfilePath: '**/Dockerfile'
   tag: '$(Build.BuildId)'
@@ -142,7 +141,7 @@ stages:
                az storage blob download --account-name isogeoonpremises --container-name versions --file versions.json --blob-url $(blobstorageURL)/versions/versions.json   --account-key '"$(AZURE_STORAGE_KEY)"'   --connection-string $(BLOB_CONNEXION_STRING)   
       - script : cat version.json | jq --arg date "$(date)" '.releaseDate += $date' > version_date.json
         displayName : Add date to version.json
-      - script: cat versions.json | jq --argjson version "$(<version_date.json)" '.$(appName)."$(tagName)" += $version' > new_versions.json
+      - script: cat versions.json | jq --argjson version "$(<version_date.json)" '.$(imageRepository)."$(tagName)" += $version' > new_versions.json
         displayName: Add version to versions.json
       - script : rm -rf versions.json && mv new_versions.json versions.json
         displayName: Rename file
