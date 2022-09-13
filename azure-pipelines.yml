@@ -50,7 +50,7 @@ stages:
      pool:
        vmImage: $(vmImageName)
      steps:
-      - script: VERSION_TAG=`git describe --tags --abbrev=0` && echo "##vso[task.setvariable variable=tag]$VERSION_TAG"
+      - script: VERSION_TAG=`git describe --tags $(git rev-list --tags --max-count=1)` && echo "##vso[task.setvariable variable=tag]$VERSION_TAG"
         displayName: Set tag variable
         condition: eq(variables['Build.SourceBranch'], 'refs/heads/debug')
       - script: docker build -t $(imageRepository) . 
@@ -102,9 +102,7 @@ stages:
           downloadType: 'single'
           artifactName: 'image'
           downloadPath: '$(System.ArtifactsDirectory)'
-      - script : git describe --tags --abbrev=0
-        displayName : Test git tag
-      - script : TAR_NAME=`echo $(SERVICE_NAME)-debug-$(git describe --tags --abbrev=0)-$(date).tar` && echo "##vso[task.setvariable variable=tarname]$TAR_NAME"
+      - script : TAR_NAME=`echo $(SERVICE_NAME)-debug-$(git describe --tags $(git rev-list --tags --max-count=1))-$(date).tar` && echo "##vso[task.setvariable variable=tarname]$TAR_NAME"
         displayName: Set tar name
         condition: eq(variables['Build.SourceBranch'], 'refs/heads/debug')
       - script : TAR_NAME=`echo $(SERVICE_NAME)-$(sourceName).tar` && echo "##vso[task.setvariable variable=tarname]$TAR_NAME"
