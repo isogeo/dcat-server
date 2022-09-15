@@ -1,6 +1,6 @@
 FROM node:16-alpine as deps
 WORKDIR /opt/app
-COPY ./package.json ./yarn.lock /opt/app
+COPY ./package.json ./yarn.lock /opt/app/
 
 RUN yarn --prod
 
