@@ -122,7 +122,7 @@ stages:
           azureSubscription: $(azureSubscription)
           scriptLocation: inlineScript
           inlineScript: |
-               az storage blob upload-batch -d $(imageRepository) -s ./ --pattern $(tarname)  --blob-endpoint $(blobstorageURL) --sas-token '"$(AZURE_STORAGE_SAS_TOKEN)"' --account-key '"$(AZURE_STORAGE_KEY)"'
+               az storage blob upload-batch -d $(imageRepository) -s ./ --pattern $(tarname).zip  --blob-endpoint $(blobstorageURL) --sas-token '"$(AZURE_STORAGE_SAS_TOKEN)"' --account-key '"$(AZURE_STORAGE_KEY)"'
           
  - stage: versions_update
    displayName: Update versions.json
