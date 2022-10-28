@@ -51,12 +51,18 @@ stages:
       - script: VERSION_TAG=`git describe --tags $(git rev-list --tags --max-count=1)` && echo "##vso[task.setvariable variable=tag]$VERSION_TAG"
         displayName: Set tag variable
         condition: eq(variables['Build.SourceBranch'], 'refs/heads/debug')
-      - script: docker build -t $(imageRepository) . 
+      - script: docker build -t isogeo.azurecr.io/$(imageRepository):debug-$(tag)-$(date) . 
         displayName: Build image
-        condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/debug'),contains(variables['Build.SourceBranch'], 'refs/tags'))
-      - script: docker save $(imageRepository) > $(imageRepository).tar
+        condition: eq(variables['Build.SourceBranch'], 'refs/heads/debug')
+      - script: docker build -t isogeo.azurecr.io/$(imageRepository):$(sourceName) . 
+        displayName: Build image
+        condition: contains(variables['Build.SourceBranch'], 'refs/tags')
+      - script: docker save isogeo.azurecr.io/$(imageRepository):$(sourceName) > $(imageRepository).tar
         displayName: Save ${{ variables.imageRepository }} image into .tar 
-        condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/debug'),contains(variables['Build.SourceBranch'], 'refs/tags')))
+        condition: contains(variables['Build.SourceBranch'], 'refs/tags')
+      - script: docker save isogeo.azurecr.io/$(imageRepository):debug-$(tag)-$(date) > $(imageRepository).tar
+        displayName: Save ${{ variables.imageRepository }} image into .tar 
+        condition: eq(variables['Build.SourceBranch'], 'refs/heads/debug')
       - task: Docker@2
         condition: succeeded() 
         displayName: Build and push an image to container registry
@@ -100,14 +106,16 @@ stages:
           downloadType: 'single'
           artifactName: 'image'
           downloadPath: '$(System.ArtifactsDirectory)'
-      - script : TAR_NAME=`echo $(SERVICE_NAME)-debug-$(git describe --tags $(git rev-list --tags --max-count=1))-$(date).tar` && echo "##vso[task.setvariable variable=tarname]$TAR_NAME"
+      - script : TAR_NAME=`echo $(SERVICE_NAME)-debug-$(git describe --tags $(git rev-list --tags --max-count=1))-$(date)` && echo "##vso[task.setvariable variable=tarname]$TAR_NAME"
         displayName: Set tar name
         condition: eq(variables['Build.SourceBranch'], 'refs/heads/debug')
-      - script : TAR_NAME=`echo $(SERVICE_NAME)-$(sourceName).tar` && echo "##vso[task.setvariable variable=tarname]$TAR_NAME"
+      - script : TAR_NAME=`echo $(SERVICE_NAME)-$(sourceName)` && echo "##vso[task.setvariable variable=tarname]$TAR_NAME"
         displayName: Set tar name
         condition: contains(variables['Build.SourceBranch'], 'refs/tags')
-      - script: mv $(System.ArtifactsDirectory)/image/$(imageRepository).tar $(tarname)
+      - script: mv $(System.ArtifactsDirectory)/image/$(imageRepository).tar $(tarname).tar
         displayName: Rename image file name with correct version
+      - script: zip -r $(tarname).zip $(tarname).tar
+        displayName: "Save tar into .zip"
       - task: AzureCLI@1
         displayName: Upload image to images blob tag version
         inputs:
