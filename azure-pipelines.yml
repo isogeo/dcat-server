@@ -51,16 +51,16 @@ stages:
       - script: VERSION_TAG=`git describe --tags $(git rev-list --tags --max-count=1)` && echo "##vso[task.setvariable variable=tag]$VERSION_TAG"
         displayName: Set tag variable
         condition: eq(variables['Build.SourceBranch'], 'refs/heads/debug')
-      - script: docker build -t isogeo.azurecr.io/$(imageRepository):debug-$(tag)-$(date) . 
+      - script: docker build -t $(imageRepository):debug-$(tag)-$(date) . 
         displayName: Build image
         condition: eq(variables['Build.SourceBranch'], 'refs/heads/debug')
-      - script: docker build -t isogeo.azurecr.io/$(imageRepository):$(sourceName) . 
+      - script: docker build -t $(imageRepository):$(sourceName) . 
         displayName: Build image
         condition: contains(variables['Build.SourceBranch'], 'refs/tags')
-      - script: docker save isogeo.azurecr.io/$(imageRepository):$(sourceName) > $(imageRepository).tar
+      - script: docker save $(imageRepository):$(sourceName) > $(imageRepository).tar
         displayName: Save ${{ variables.imageRepository }} image into .tar 
         condition: contains(variables['Build.SourceBranch'], 'refs/tags')
-      - script: docker save isogeo.azurecr.io/$(imageRepository):debug-$(tag)-$(date) > $(imageRepository).tar
+      - script: docker save $(imageRepository):debug-$(tag)-$(date) > $(imageRepository).tar
         displayName: Save ${{ variables.imageRepository }} image into .tar 
         condition: eq(variables['Build.SourceBranch'], 'refs/heads/debug')
       - task: Docker@2
