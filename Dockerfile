@@ -16,6 +16,6 @@ ENV PORT=5000 \
     ISOGEO_APP_URL=https://qa-isogeo-app.azurewebsites.net \
     ISOGEO_CLIENT_ID=isogeo-dcat \
     GDP_API_URL=https://geodataprocess.api.isogeo.com  \
-    NODE_EXTRA_CA_CERTS=/etc/ssl/ca.crt
+    NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca.crt
 
 CMD yarn start
