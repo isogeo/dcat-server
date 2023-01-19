@@ -2,8 +2,11 @@
     "release-note": "DCAT serveur release note",
     "compliance": {
         "api": {
-            "minimum": "2.21.2"
-        }
+            "minimum": "2.22.0"
+        },
+        "nginx": [
+          "1.23.2"
+        ]
     },
     "extension": "zip"
 }
