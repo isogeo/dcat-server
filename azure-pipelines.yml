@@ -17,6 +17,9 @@ resources:
       name: isogeo/devops-templates
       endpoint: isogeo
 
+pool:
+  vmImage: 'ubuntu-latest'
+
 stages:
 # Create zip for saas deployment
  - stage: saas_integration
@@ -24,8 +27,6 @@ stages:
    jobs : 
    - job : npm_build
      displayName : 'Npm build'
-     pool:
-       vmImage: 'ubuntu-latest'
      steps : 
      - script: |
          npm install
