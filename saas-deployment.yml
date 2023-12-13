@@ -1,0 +1,67 @@
+trigger: none
+
+resources:
+  pipelines:
+  - pipeline: dcat-server-main-master
+    source: dcat-server-main
+    trigger:
+      branches:
+        include:
+        - master
+  - pipeline: dcat-server-main-tag
+    source: dcat-server-main
+    trigger:
+      branches:
+        include:
+        - refs/tags/*
+
+variables : 
+  tagRunId : $(resources.pipeline.dcat-server-main-tag.runID)
+  masterRunId : $(resources.pipeline.dcat-server-main-master.runID)
+
+stages : 
+- stage : deploy_to_qa
+  condition: contains(variables['Resources.TriggeringAlias'], 'master')
+  jobs : 
+  - job : deploy_job
+    steps:
+    - checkout : none
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        buildType: 'specific'
+        runVersion : 'specific'
+        buildId : $(masterRunId)
+        project: 'dcat-server'
+        definition: '143'
+        artifactName: 'drop'
+        targetPath: '$(Pipeline.Workspace)'
+    - task: AzureRmWebAppDeployment@4
+      inputs:
+        ConnectionType: 'AzureRM'
+        azureSubscription: 'Isogeo - MPN (82885610-5841-4749-8d71-46f56b643ad2)'
+        appType: 'webApp'
+        WebAppName: 'qa-dcat-server'
+        packageForLinux: '$(Pipeline.Workspace)/*.zip'
+
+- stage : deploy_to_prod
+  condition: contains(variables['Resources.TriggeringAlias'], 'tag')
+  jobs : 
+  - job : deploy_job
+    steps:
+    - checkout : none
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        buildType: 'specific'
+        runVersion : 'specific'
+        buildId : $(tagRunId)
+        project: 'dcat-server'
+        definition: '143'
+        artifactName: 'drop'
+        targetPath: '$(Pipeline.Workspace)'
+    - task: AzureRmWebAppDeployment@4
+      inputs:
+        ConnectionType: 'AzureRM'
+        azureSubscription: 'Isogeo - MPN (82885610-5841-4749-8d71-46f56b643ad2)'
+        appType: 'webApp'
+        WebAppName: 'dcat-server'
+        packageForLinux: '$(Pipeline.Workspace)/*.zip'

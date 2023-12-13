@@ -1,180 +1,72 @@
+# Define trigger
 trigger:
- tags :
-  include : ['*']
- branches:
+  batch: true
+  tags:
+    include:
+    - "*"
+  branches:
       include:
         - debug
         - master
 
+# Import necessary resources
 resources:
-- repo: self
-
-variables:
-  blobstorageURL: $(BLOB_STORAGE_URL)
-  imageRepository: 'dcat-server'
-  containerRegistry: $(CONTAINER_REGISTRY)
-  dockerfilePath: '**/Dockerfile'
-  tag: '$(Build.BuildId)'
-  sourceName: $[replace(variables['Build.SourceBranch'], 'refs/tags/', '')]
-  vmImageName: 'ubuntu-latest'
-  azureSubscription : $(AZURE_SUBSCRIPTION)
-  date: $[format('{0:dd}.{0:MM}.{0:yyyy}', pipeline.startTime)]
-  ${{ if contains(variables['Build.SourceBranch'], 'refs/tags') }}:
-     tagName : $(sourceName)
+  repositories:
+    - repository: templates
+      type: github
+      name: isogeo/devops-templates
+      endpoint: isogeo
 
 stages:
- - stage: product_build
-   displayName : Building ${{ variables.imageRepository }}
+# Create zip for saas deployment
+ - stage: saas_integration
+   condition: or(contains(variables['Build.SourceBranch'], 'refs/tags'), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
    jobs : 
-   - job: regularBuild
-     condition: contains(variables['Build.SourceBranch'], 'refs/tags')
-     displayName: Building ${{ variables.imageRepository }} - SaaS
-     pool:
-       vmImage: $(vmImageName)
-     steps:
+   - job : npm_build
+     displayName : 'Npm build'
+     steps : 
      - script: |
-        npm install
+         npm install
        displayName: Install dependencies
      - task: ArchiveFiles@2
        inputs:
          rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
          includeRootFolder: false
-       displayName: Archive files
+       displayName: 'Archive files'
      - task: PublishBuildArtifacts@1
        displayName: 'Publish artifacts: drop'
-   - job: image_blob_build
-     condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/debug'),contains(variables['Build.SourceBranch'], 'refs/tags'), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
-     displayName : Build ${{ variables.imageRepository }} image
-     pool:
-       vmImage: $(vmImageName)
-     steps:
-      - script: VERSION_TAG=`git describe --tags $(git rev-list --tags --max-count=1)` && echo "##vso[task.setvariable variable=tag]$VERSION_TAG"
-        displayName: Set tag variable
-        condition: eq(variables['Build.SourceBranch'], 'refs/heads/debug')
-      - script: docker build -t $(imageRepository):debug-$(tag)-$(date) . 
-        displayName: Build image
-        condition: eq(variables['Build.SourceBranch'], 'refs/heads/debug')
-      - script: docker build -t $(imageRepository):$(sourceName) . 
-        displayName: Build image
-        condition: contains(variables['Build.SourceBranch'], 'refs/tags')
-      - script: docker save $(imageRepository):$(sourceName) > $(imageRepository).tar
-        displayName: Save ${{ variables.imageRepository }} image into .tar 
-        condition: contains(variables['Build.SourceBranch'], 'refs/tags')
-      - script: docker save $(imageRepository):debug-$(tag)-$(date) > $(imageRepository).tar
-        displayName: Save ${{ variables.imageRepository }} image into .tar 
-        condition: eq(variables['Build.SourceBranch'], 'refs/heads/debug')
-      - task: Docker@2
-        condition: succeeded() 
-        displayName: Build and push an image to container registry
-        inputs:
-          command: buildAndPush
-          repository: $(imageRepository)
-          dockerfile: $(dockerfilePath)
-          containerRegistry: $(DOCKER_REGISTRY_SERVICE_CONNECTION)
-          ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/debug') }}:
-            tags: |
-              debug-$(tag)-$(date)
-          ${{ if contains(variables['Build.SourceBranch'], 'refs/tags') }}:
-            tags: |
-              latest
-              $(sourceName)
-          ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
-            tags: |
-              qa 
-      - task: CopyFiles@2
-        condition: and(or(eq(variables['Build.SourceBranch'], 'refs/heads/debug'),contains(variables['Build.SourceBranch'], 'refs/tags')), succeeded())
-        displayName: Copy .tar to use later
-        inputs:
-          contents: '$(imageRepository).tar'
-          targetFolder: '$(Build.ArtifactStagingDirectory)'
-      - task: PublishBuildArtifacts@1
-        condition : and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/debug'),contains(variables['Build.SourceBranch'], 'refs/tags')))
-        inputs:
-          PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(imageRepository).tar'
-          ArtifactName: 'image'
-   - job: blob_upload
-     displayName: Uploading archive to blob storage
-     condition: and(succeeded(), or(contains(variables['Build.SourceBranch'], 'refs/tags'),eq(variables['Build.SourceBranch'], 'refs/heads/debug')))
-     pool:
-       vmImage: $(vmImageName)
-     dependsOn:
-      - image_blob_build
-     steps:
-      - task: DownloadBuildArtifacts@0
-        inputs:
-          buildType: 'current'
-          downloadType: 'single'
-          artifactName: 'image'
-          downloadPath: '$(System.ArtifactsDirectory)'
-      - script : TAR_NAME=`echo $(SERVICE_NAME)-debug-$(git describe --tags $(git rev-list --tags --max-count=1))-$(date)` && echo "##vso[task.setvariable variable=tarname]$TAR_NAME"
-        displayName: Set tar name
-        condition: eq(variables['Build.SourceBranch'], 'refs/heads/debug')
-      - script : TAR_NAME=`echo $(SERVICE_NAME)-$(sourceName)` && echo "##vso[task.setvariable variable=tarname]$TAR_NAME"
-        displayName: Set tar name
-        condition: contains(variables['Build.SourceBranch'], 'refs/tags')
-      - script: mv $(System.ArtifactsDirectory)/image/$(imageRepository).tar $(tarname).tar
-        displayName: Rename image file name with correct version
-      - script: zip -r $(tarname).zip $(tarname).tar
-        displayName: "Save tar into .zip"
-      - task: AzureCLI@1
-        displayName: Upload image to images blob tag version
-        inputs:
-          azureSubscription: $(azureSubscription)
-          scriptLocation: inlineScript
-          inlineScript: |
-               az storage blob upload-batch -d $(imageRepository) -s ./ --pattern $(tarname).zip  --blob-endpoint $(blobstorageURL) --sas-token '"$(AZURE_STORAGE_SAS_TOKEN)"' --account-key '"$(AZURE_STORAGE_KEY)"'
-          
- - stage: versions_update
-   displayName: Update versions.json
-   dependsOn: product_build
-   condition: and(succeeded(), contains(variables['Build.SourceBranch'], 'refs/tags'))
-   jobs:
-   - job: Updatejson
-     displayName: Update versions.json
-     pool:
-       vmImage: $(vmImageName)
-     steps:
-      - script: sudo apt-get install jq
-        displayName: Install jq tools
-      - task: AzureCLI@1
-        displayName : Download versions.json
-        inputs:
-          azureSubscription: $(azureSubscription)
-          scriptLocation: inlineScript
-          inlineScript: |
-               az storage blob download --account-name isogeoonpremises --container-name versions --file versions.json --blob-url $(blobstorageURL)/versions/versions.json   --account-key '"$(AZURE_STORAGE_KEY)"'   --connection-string $(BLOB_CONNEXION_STRING)   
-      - script : cat version.json | jq --arg date "$(date)" '."release-date" += $date' > version_date.json
-        displayName : Add date to version.json
-      - script: cat versions.json | jq --argjson version "$(<version_date.json)" '."$(imageRepository)"."$(tagName)" += $version' > new_versions.json
-        displayName: Add version to versions.json
-      - script : rm -rf versions.json && mv new_versions.json versions.json
-        displayName: Rename file
-      - task: AzureCLI@1
-        displayName: Write versions.json to the blob storage
-        inputs:
-           azureSubscription: $(azureSubscription)
-           scriptLocation: inlineScript
-           inlineScript: |
-                az storage blob upload-batch -d versions -s ./ --pattern versions.json  --blob-endpoint $(blobstorageURL)  --sas-token '"$(AZURE_STORAGE_SAS_TOKEN)"' --account-key '"$(AZURE_STORAGE_KEY)"'  --overwrite
 
+# Build image
+ - stage : image_build_update
+   jobs :
+   - template : /on-premises/docker_build_upload.yml@templates
+
+# Upload image to blob
+ - stage : upload_to_blob
+   condition: and(succeeded(), or(contains(variables['Build.SourceBranch'], 'refs/tags'),eq(variables['Build.SourceBranch'], 'refs/heads/debug'), eq(variables['Build.SourceBranch'], 'refs/heads/master')))
+   dependsOn : image_build_update
+   variables : 
+     zipName : $[ stageDependencies.image_build_update.image_build_and_upload.outputs['set_tag_variable.tag'] ]
+   jobs:
+   - template : /on-premises/upload_to_blob.yml@templates
+     parameters : 
+       zipName : $(NAME)-$(zipName).zip
+
+# Update versions.json
+ - stage: versions_update
+   condition: contains(variables['Build.SourceBranch'], 'refs/tags')
+   dependsOn : 
+   - upload_to_blob
+   jobs:
+   - template : /on-premises/update_versions.yml@templates
+
+# Tag installer
  - stage: installer_tag
    displayName : Tag Installer Version
+   condition: contains(variables['Build.SourceBranch'], 'refs/tags')
    dependsOn: versions_update
    jobs : 
-   - job : Createtag
-     displayName : Create installer new tag
-     pool:
-       vmImage: $(vmImageName)
-     steps:
-      - script: sudo apt-get install jq
-        displayName: Install jq tools 
-      - script: 'curl -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $(PAT_GITHUB_TOKEN)" https://api.github.com/repos/isogeo/isogeo-on-premises/tags > tags.json'
-        displayName: Parse name
-      - bash : GITHUBTAG=$(cat tags.json | jq -r '.[0].name' | awk -F. -v OFS=. '{$NF += 1 ; print}') && echo "##vso[task.setvariable variable=GITHUBTAG]$GITHUBTAG"
-        displayName : Increment version
-      - script: 'curl -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $(PAT_GITHUB_TOKEN)" https://api.github.com/repos/isogeo/isogeo-on-premises/releases --data-raw "{   \"tag_name\": \"$(GITHUBTAG)\"}" > releaseouput.json'
-        displayName : Create Release
-      - bash : RELEASEID=$(cat releaseouput.json | jq -r '.id') && echo "##vso[task.setvariable variable=RELEASEID]$RELEASEID"
-        displayName : Set release Id
-      - script : 'curl -X DELETE -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $(PAT_GITHUB_TOKEN)" https://api.github.com/repos/isogeo/isogeo-on-premises/releases/$(RELEASEID)'
-        displayName : Remove release 
+   - template : /on-premises/retrieve_github_pat.yml@templates
+   - template : /on-premises/installer_tag.yml@templates
+     parameters : 
+      DependsOn : 'retrieve_pat'
