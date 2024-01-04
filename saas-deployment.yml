@@ -37,7 +37,7 @@ stages :
     - task: AzureRmWebAppDeployment@4
       inputs:
         ConnectionType: 'AzureRM'
-        azureSubscription: 'Isogeo - MPN (82885610-5841-4749-8d71-46f56b643ad2)'
+        azureSubscription: 'Isogeo - MPN(82885610-5841-4749-8d71-46f56b643ad2)'
         appType: 'webApp'
         WebAppName: 'qa-dcat-server'
         packageForLinux: '$(Pipeline.Workspace)/*.zip'
@@ -60,7 +60,7 @@ stages :
     - task: AzureRmWebAppDeployment@4
       inputs:
         ConnectionType: 'AzureRM'
-        azureSubscription: 'Isogeo - MPN (82885610-5841-4749-8d71-46f56b643ad2)'
+        azureSubscription: 'Isogeo - MPN(82885610-5841-4749-8d71-46f56b643ad2)'
         appType: 'webApp'
         WebAppName: 'dcat-server'
         packageForLinux: '$(Pipeline.Workspace)/*.zip'
