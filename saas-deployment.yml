@@ -11,9 +11,8 @@ resources:
   - pipeline: dcat-server-main-tag
     source: dcat-server-main
     trigger:
-      branches:
-        include:
-        - refs/tags/*
+      stages : 
+        - versions_update
 
 variables : 
   tagRunId : $(resources.pipeline.dcat-server-main-tag.runID)
