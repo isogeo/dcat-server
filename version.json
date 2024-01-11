@@ -1,8 +1,14 @@
 {
-    "release-note": "DCAT serveur release note",
+    "release-note": {
+        "en": "* Add new formats.",
+        "fr": "* Ajout de format de téléchargement."
+      },
     "compliance": {
         "api": {
-            "minimum": "2.22.0"
+            "minimum": "2.22.7"
+        },
+        "geodataprocess-api": {
+          "minimum": "1.0.7"
         },
         "nginx": [
           "1.23.2"
