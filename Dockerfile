@@ -5,8 +5,8 @@ COPY ./package.json ./yarn.lock /opt/app/
 RUN yarn --prod
 
 FROM node:16-alpine as runner
-COPY . .
 COPY --from=deps /opt/app/node_modules ./node_modules
+COPY . .
 
 ENV PORT=5000 \
     ISOGEO_API_URL=https://api.qa.isogeo.com/v1 \
