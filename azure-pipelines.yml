@@ -1,3 +1,5 @@
+pr: none
+
 # Define trigger
 trigger:
   batch: true
