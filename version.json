@@ -1,7 +1,7 @@
 {
     "release-note": {
-        "en": "* Add new formats.",
-        "fr": "* Ajout de format de téléchargement."
+        "en": "* Image optimisation.",
+        "fr": "* Optimisation de l'image"
       },
     "compliance": {
         "api": {
