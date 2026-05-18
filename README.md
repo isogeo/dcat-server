@@ -1,6 +1,16 @@
-# dcat-server
+# Serveur DCAT
+
+| Builds | Deployments |
+| ------ | ----------- |
+|[![Build Status](https://dev.azure.com/isogeo/dcat-server/_apis/build/status%2Fdcat-server-main?repoName=isogeo%2Fdcat-server&branchName=master)](https://dev.azure.com/isogeo/dcat-server/_build/latest?definitionId=79&repoName=isogeo%2Fdcat-server&branchName=master) | [![Build Status](https://dev.azure.com/isogeo/dcat-server/_apis/build/status%2Fdcat-server-cd-saas?branchName=master)](https://dev.azure.com/isogeo/dcat-server/_build/latest?definitionId=158&branchName=master) |
 
 Serveur DCAT pour Isogeo
+
+## SaaS
+
+En SaaS, le serveur DCAT est disponible : 
+
+* https://dcat.isogeo.com/
 
 ## Pré-requis
 
@@ -56,3 +66,7 @@ $ yarn lint
 
 Le flux DCAT d’un partage Isogeo donné est récupéré grâce à l'URL suivant :
 `http://localhost:5000/:shareId/:urlToken`
+
+## Documentation utilisateur
+
+La documentation utilisateur est disponible dans [l'aide en ligne](https://help.isogeo.com/doc-admin/features/publish/harvest_datagouv_fr/).
