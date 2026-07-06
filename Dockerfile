@@ -1,10 +1,10 @@
-FROM node:16-alpine as deps
+FROM node:18.20.8-alpine as deps
 WORKDIR /opt/app
 COPY ./package.json ./yarn.lock /opt/app/
 
 RUN yarn --prod
 
-FROM node:16-alpine as runner
+FROM node:18.20.8-alpine as runner
 COPY --from=deps /opt/app/node_modules ./node_modules
 COPY . .
 
