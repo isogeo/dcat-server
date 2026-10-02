@@ -1,7 +1,7 @@
 {
     "release-note": {
-        "en": "* Image optimisation.",
-        "fr": "* Optimisation de l'image"
+        "en": "* Pour toutes les fréquences non matchées indiquer Autre à la place de Inconnu.",
+        "fr": "* For all unmatched frequencies, display Other instead of Unknown"
       },
     "compliance": {
         "api": {
