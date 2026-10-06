@@ -48,7 +48,8 @@ stages:
 
 # Upload image to blob
  - stage : upload_to_blob
-   condition: and(succeeded(), or(contains(variables['Build.SourceBranch'], 'refs/tags'),eq(variables['Build.SourceBranch'], 'refs/heads/debug'), eq(variables['Build.SourceBranch'], 'refs/heads/master')))
+   condition: and(succeeded(), or(contains(variables['Build.SourceBranch'], 'refs/tags'), eq(variables['Build.SourceBranch'], 'refs/heads/debug')))
+   #and(succeeded(), or(contains(variables['Build.SourceBranch'], 'refs/tags'),eq(variables['Build.SourceBranch'], 'refs/heads/debug'), eq(variables['Build.SourceBranch'], 'refs/heads/master')))
    dependsOn : image_build_update
    variables : 
      zipName : $[ stageDependencies.image_build_update.image_build_and_upload.outputs['set_tag_variable.tag'] ]
