@@ -1,8 +1,12 @@
 FROM node:18.20.8-alpine as deps
 WORKDIR /opt/app
-COPY ./package.json ./yarn.lock /opt/app/
 
-RUN yarn --prod
+ARG NPM_TOKEN
+
+COPY ./package.json ./yarn.lock /opt/app/
+COPY .npmrc /opt/app/.npmrc
+
+RUN export TOKEN=${NPM_TOKEN} && yarn --prod && rm .npmrc
 
 FROM node:18.20.8-alpine as runner
 COPY --from=deps /opt/app/node_modules ./node_modules
