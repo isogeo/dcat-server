@@ -1,4 +1,4 @@
-FROM node:18.20.8-alpine as deps
+FROM node:22.23.3-alpine as deps
 WORKDIR /opt/app
 
 ARG NPM_TOKEN
@@ -8,7 +8,7 @@ COPY .npmrc /opt/app/.npmrc
 
 RUN export TOKEN=${NPM_TOKEN} && yarn --prod && rm .npmrc
 
-FROM node:18.20.8-alpine as runner
+FROM node:22.23.3-alpine as runner
 COPY --from=deps /opt/app/node_modules ./node_modules
 COPY . .
 
