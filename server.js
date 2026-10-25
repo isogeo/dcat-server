@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 require('dotenv').config()
 
+const {pipeline} = require('stream')
 const express = require('express')
 const cors = require('cors')
 const morgan = require('morgan')
@@ -59,12 +60,17 @@ app.get('/:shareId/:shareToken/debug-page', w(async (req, res) => {
 
 app.get('/:shareId/:shareToken/download/:resourceId/:linkId', w(async (req, res) => {
   const {resourceId, linkId} = req.params
-  const downloadStream = await apiClient.getDownloadStream(resourceId, linkId)
-  downloadStream.on('error', function(e){
-    res.status(404)
-    res.json({"error" : "File doesn't exist"
-  })})
-  downloadStream.pipe(res)
+  let file
+  try {
+    file = await apiClient.getDownloadStream(resourceId, linkId)
+  } catch {
+    return res.status(404).json({"error" : "File doesn't exist"})
+  }
+  res.set('Content-Type', file.contentType || 'application/octet-stream')
+  if (file.filename) {
+    res.set('Content-Disposition', `attachment; filename=${file.filename}`)
+  }
+  pipeline(file.stream, res, () => {})
 }))
 
 const port = process.env.PORT || 5000
