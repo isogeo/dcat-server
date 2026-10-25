@@ -11,6 +11,7 @@ RUN export TOKEN=${NPM_TOKEN} && yarn --prod && rm .npmrc
 FROM node:22.23.3-alpine as runner
 COPY --from=deps /opt/app/node_modules ./node_modules
 COPY . .
+RUN rm .npmrc
 
 ENV PORT=5000 \
     ISOGEO_API_URL=https://api.qa.isogeo.com/v1 \
