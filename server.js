@@ -66,9 +66,10 @@ app.get('/:shareId/:shareToken/download/:resourceId/:linkId', w(async (req, res)
   } catch {
     return res.status(404).json({"error" : "File doesn't exist"})
   }
-  res.set('Content-Type', file.contentType || 'application/octet-stream')
-  if (file.filename) {
-    res.set('Content-Disposition', `attachment; filename=${file.filename}`)
+  for (const [key, value] of Object.entries(file.headers)) {
+    if (key !== 'content-encoding') {
+      res.setHeader(key, value)
+    }
   }
   pipeline(file.stream, res, () => {})
 }))
