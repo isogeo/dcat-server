@@ -35,6 +35,18 @@ Environment variables are defined in a `.env` file. Copy `.env.sample` to `.env`
 
 ## Installation
 
+Create a GitHub personal access token with the
+`read:packages` scope
+(GitHub -> Settings -> Developer settings -> Personal access tokens),
+then install the SDK:
+
+```bash
+export TOKEN=YOUR_GITHUB_TOKEN
+yarn add @isogeo/sdk-js
+```
+
+Install all necessary modules:
+
 ```bash
 yarn          # dev
 
@@ -50,6 +62,28 @@ yarn --prod   # production
 | `yarn start` | Start the server |
 | `yarn test` | Run unit tests ([ava](https://github.com/avajs/ava)) |
 | `yarn lint` | Run linter ([xo](https://github.com/xojs/xo)) |
+
+## Docker build
+
+If `.npmrc` is already configured for npm registry authentication (as in pipeline build):
+
+```bash
+docker build -t dcat-server .
+```
+
+If a registry authentication token is available as environment variable:
+
+```bash
+docker build -t dcat-server --build-arg NPM_TOKEN=$NPM_TOKEN .
+```
+
+If no registry authentication token is available:
+
+```bash
+docker build -t dcat-server --build-arg NPM_TOKEN={valid token} .
+```
+
+The provided token must have access to Isogeo npm modules.
 
 ## Major libraries
 
