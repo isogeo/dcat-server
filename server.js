@@ -67,7 +67,7 @@ app.get('/:shareId/:shareToken/download/:resourceId/:linkId', w(async (req, res)
     return res.status(404).json({"error" : "File doesn't exist"})
   }
   for (const [key, value] of Object.entries(file.headers)) {
-    if (key !== 'content-encoding') {
+    if (!['content-encoding', 'connection', 'keep-alive', 'transfer-encoding'].includes(key)) {
       res.setHeader(key, value)
     }
   }
