@@ -71,6 +71,7 @@ app.get('/:shareId/:shareToken/download/:resourceId/:linkId', w(async (req, res)
       res.setHeader(key, value)
     }
   }
+  res.status(file.status)
   pipeline(file.stream, res, () => {})
 }))
 
