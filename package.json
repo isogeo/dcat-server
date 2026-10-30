@@ -4,14 +4,13 @@
   "description": "DCAT server for Isogeo",
   "repository": "git@github.com:isogeo/dcat-server.git",
   "license": "GPL-3.0",
-  "private": false,
   "scripts": {
     "lint": "xo",
     "test": "ava",
     "start": "node server"
   },
   "dependencies": {
-    "@isogeo/sdk-js": "^1.2.0",
+    "@isogeo/sdk-js": "^1.3.0",
     "JSONStream": "^1.3.5",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
