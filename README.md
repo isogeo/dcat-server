@@ -37,12 +37,10 @@ Environment variables are defined in a `.env` file. Copy `.env.sample` to `.env`
 
 Create a GitHub personal access token with the
 `read:packages` scope
-(GitHub -> Settings -> Developer settings -> Personal access tokens),
-then install the SDK:
+(GitHub -> Settings -> Developer settings -> Personal access tokens)
 
 ```bash
 export TOKEN=YOUR_GITHUB_TOKEN
-yarn add @isogeo/sdk-js
 ```
 
 Install all necessary modules:
