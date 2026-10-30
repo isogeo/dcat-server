@@ -75,6 +75,12 @@ app.get('/:shareId/:shareToken/download/:resourceId/:linkId', w(async (req, res)
   pipeline(file.stream, res, () => {})
 }))
 
+app.use((err, req, res, next) => {
+  const error = new Error(err.message)
+  error.stack = err.stack
+  next(error)
+})
+
 const port = process.env.PORT || 5000
 
 app.listen(port, () => {
